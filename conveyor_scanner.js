@@ -1,9 +1,10 @@
 // ==UserScript==
-// @name         Conveyor Scanner Auto-Submit
+// @name         Queue v1.0 ( 0102446 )
 // @namespace    http://tampermonkey.net/
 // @version      1.0
-// @description  Queue scanner inputs and auto-submit to webpage
-// @match        https://yourwebsite.com/*
+// @author       ( 0102446 )
+// @description  Queue Hyperscans and Auto Drop to VR trailer zones.
+// @match        file:///F:/WebDevelopment/IXDaSLOT/test_webpage.html
 // @grant        none
 // ==/UserScript==
 
@@ -30,21 +31,21 @@
         panel.id = 'scannerPanel';
         panel.innerHTML = `
             <div style="position:fixed;top:10px;right:10px;background:#2c3e50;color:#ecf0f1;padding:15px;border-radius:8px;z-index:10000;min-width:280px;font-family:monospace;box-shadow:0 4px 6px rgba(0,0,0,0.3)">
-                <h3 style="margin:0 0 10px 0;font-size:14px;"> Queue v1.0 (mNk)</h3>
+                <h3 style="margin:0 0 10px 0;font-size:14px;"> Queue v1.0 (#0102446)</h3>
                 <div><span style="color:#3498db;">Queue:</span> <span id="queueCount">0</span></div>
                 <div><span style="color:#e74c3c;">Processing:</span> <span id="processingStatus">Idle</span></div>
                 <div style="margin-top:10px;padding-top:10px;border-top:1px solid #34495e;">
                     <div style="margin-bottom:5px;"><span style="color:#95a5a6;">Total Scanned:</span> <strong><span id="totalCount">0</span></strong></div>
                     <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-                        <span style="color:#27ae60;">✓ Successful:</span> 
+                        <span style="color:#27ae60;">✓ Successful:</span>
                         <span><span id="csxCount">0</span> (<span id="csxPercent">0</span>%)</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-                        <span style="color:#e74c3c;">✗ Errors:</span> 
+                        <span style="color:#e74c3c;">✗ Errors:</span>
                         <span><span id="nonCsxCount">0</span> (<span id="nonCsxPercent">0</span>%)</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;">
-                        <span style="color:#f39c12;">⟳ Duplicates:</span> 
+                        <span style="color:#f39c12;">⟳ Duplicates:</span>
                         <span id="duplicateCount">0</span>
                     </div>
                 </div>
@@ -62,7 +63,7 @@
         document.getElementById('toggleScanner').addEventListener('click', toggleScanner);
         document.getElementById('clearQueue').addEventListener('click', clearQueue);
         document.getElementById('scannerInput').addEventListener('keypress', handleScannerInput);
-        
+
         // Initial UI update
         updateUI();
     }
@@ -70,7 +71,7 @@
     // Add item to queue
     function addToQueue(data) {
         if (!scannerActive) return;
-        
+
         // Filter: only accept inputs starting with "csx" (case-insensitive)
         const csxPattern = /^csx/i;
         if (!csxPattern.test(data)) {
@@ -80,7 +81,7 @@
             updateUI();
             return;
         }
-        
+
         // Check for duplicates
         const normalizedData = data.toLowerCase();
         if (processedRecords.has(normalizedData)) {
@@ -90,7 +91,7 @@
             updateUI();
             return;
         }
-        
+
         csxCount++;
         const timestamp = new Date().toLocaleTimeString();
         scanQueue.push({ data, timestamp });
@@ -98,7 +99,7 @@
         updateUI();
         document.getElementById('lastScanned').textContent = `Last: ${data} at ${timestamp}`;
         document.getElementById('lastScanned').style.color = '#27ae60';
-        
+
         // Start processing if not already running
         if (!isProcessing) {
             processQueue();
@@ -108,14 +109,14 @@
     // Process queue sequentially
     async function processQueue() {
         if (isProcessing || scanQueue.length === 0) return;
-        
+
         isProcessing = true;
         updateUI();
 
         while (scanQueue.length > 0) {
             const item = scanQueue.shift();
             updateUI();
-            
+
             try {
                 await submitToWebpage(item.data);
                 await sleep(SUBMIT_DELAY);
@@ -144,9 +145,9 @@
 
             input.value = data;
             input.dispatchEvent(new Event('input', { bubbles: true }));
-            
+
             submitBtn.click();
-            
+
             setTimeout(resolve, 100);
         });
     }
@@ -157,7 +158,7 @@
             e.preventDefault();
             const input = e.target;
             const value = input.value.trim();
-            
+
             if (value) {
                 addToQueue(value);
                 input.value = '';
@@ -189,9 +190,9 @@
         const total = csxCount + nonCsxCount;
         const csxPercent = total > 0 ? Math.round((csxCount / total) * 100) : 0;
         const nonCsxPercent = total > 0 ? Math.round((nonCsxCount / total) * 100) : 0;
-        
+
         document.getElementById('queueCount').textContent = scanQueue.length;
-        document.getElementById('processingStatus').textContent = 
+        document.getElementById('processingStatus').textContent =
             isProcessing ? 'Active' : (scannerActive ? 'Idle' : 'Paused');
         document.getElementById('totalCount').textContent = total;
         document.getElementById('csxCount').textContent = csxCount;
