@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        #scanInput {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        #scanInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        #submitBtn {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        #submitBtn:hover {
+            background: #5568d3;
+        }
+        
+        #submitBtn:active {
+            transform: scale(0.98);
+        }
+        
+        .log-container {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .log-container h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .log-entry {
+            padding: 8px 12px;
+            background: white;
+            border-left: 3px solid #667eea;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .timestamp {
+            color: #888;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .counter {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 6px;
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scanner Test</h1>
+        
+        <div class="input-group">
+            <label for="scanInput">Scan Input Field</label>
+            <input type="text" id="scanInput" placeholder="Scanned items will appear here...">
+        </div>
+        
+        <button id="submitBtn">Submit</button>
+        
+        <div class="counter">
+            Total Scanned: <span id="totalCount">0</span>
+        </div>
+        
+        <div class="log-container">
+            <h2>Submission Log</h2>
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <script>
+        let totalCount = 0;
+        const logEntries = document.getElementById('logEntries');
+        const totalCountEl = document.getElementById('totalCount');
+        const submitBtn = document.getElementById('submitBtn');
+        const scanInput = document.getElementById('scanInput');
+
+        submitBtn.addEventListener('click', function() {
+            const value = scanInput.value.trim();
+            
+            if (value) {
+                totalCount++;
+                totalCountEl.textContent = totalCount;
+                
+                const timestamp = new Date().toLocaleTimeString();
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `
+                    <span class="timestamp">${timestamp}</span>
+                    <strong>#${totalCount}</strong> - ${value}
+                `;
+                
+                logEntries.insertBefore(entry, logEntries.firstChild);
+                
+                // Clear input after submission
+                scanInput.value = '';
+                
+                // Keep only last 50 entries
+                if (logEntries.children.length > 50) {
+                    logEntries.removeChild(logEntries.lastChild);
+                }
+            }
+        });
+
+        // Allow Enter key to submit
+        scanInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
